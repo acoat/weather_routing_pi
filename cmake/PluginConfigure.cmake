@@ -85,6 +85,7 @@ ENDIF(DEFINED _wx_selected_config)
 MESSAGE (STATUS "*** Staging to build ${PACKAGE_NAME} ***")
 
 include  ("VERSION.cmake")
+configure_file(${PROJECT_SOURCE_DIR}/cmake/wxWTranslateCatalog.h.in ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/include/wxWTranslateCatalog.h)
 
 #  Do the version.h configuration into the build output directory,
 #  thereby allowing building from a read-only source tree.
@@ -95,9 +96,28 @@ ENDIF(NOT SKIP_VERSION_CONFIG)
 
 SET(PLUGIN_VERSION "${PLUGIN_VERSION_MAJOR}.${PLUGIN_VERSION_MINOR}.${PLUGIN_VERSION_PATCH}" )
 
-INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/src)
+INCLUDE_DIRECTORIES(BEFORE ${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/src)
 
 # SET(PROFILING 1)
+
+if (CMAKE_VERSION VERSION_LESS "3.1")
+  include(CheckCXXCompilerFlag)
+  CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
+  CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
+  if(COMPILER_SUPPORTS_CXX11)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+    message(STATUS "Setting C++11 standard via CXX flags")
+  elseif(COMPILER_SUPPORTS_CXX0X)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+    message(STATUS "Setting C++0x standard via CXX FLAGS")
+  else()
+        message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
+  endif()
+else ()
+  set (CMAKE_CXX_STANDARD 11)
+  message(STATUS "Setting C++11 standard via cmake standard mecahnism")
+endif ()
+
 
 #  IF NOT DEBUGGING CFLAGS="-O2 -march=native"
 IF(NOT MSVC)
@@ -275,13 +295,6 @@ IF(NOT WIN32)
  ENDIF(NOT APPLE)
 
 ENDIF(NOT WIN32)
-
-
-# Add some definitions to satisfy MS
-IF(WIN32)
-    ADD_DEFINITIONS(-D__MSVC__)
-    ADD_DEFINITIONS(-D_CRT_NONSTDC_NO_DEPRECATE -D_CRT_SECURE_NO_DEPRECATE)
-ENDIF(WIN32)
 
 # Let cmake find additional modules private
 LIST(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR})

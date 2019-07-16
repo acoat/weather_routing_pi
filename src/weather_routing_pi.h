@@ -60,7 +60,7 @@ std::cout << x << std::endl; } while (0)
 #include "version.h"
 
 #define     MY_API_VERSION_MAJOR    1
-#define     MY_API_VERSION_MINOR    13
+#define     MY_API_VERSION_MINOR    15
 
 #define ABOUT_AUTHOR_URL "http://seandepagnier.users.sourceforge.net"
 
@@ -77,8 +77,7 @@ std::cout << x << std::endl; } while (0)
 #undef MAX
 #endif
 
-#include "wx/jsonreader.h"
-#include "wx/jsonwriter.h"
+#include "json/json.h"
 
 //----------------------------------------------------------------------------------------------------------
 //    The PlugIn Class Definition
@@ -88,14 +87,14 @@ std::cout << x << std::endl; } while (0)
 
 class WeatherRouting;
 
-class weather_routing_pi : public wxEvtHandler, public opencpn_plugin_113
+class weather_routing_pi : public wxEvtHandler, public opencpn_plugin_115
 {
 public:
       weather_routing_pi(void *ppimgr);
-      ~weather_routing_pi(void);
+      ~weather_routing_pi();
 
-      int Init(void);
-      bool DeInit(void);
+      int Init();
+      bool DeInit();
 
       int GetAPIVersionMajor();
       int GetAPIVersionMinor();
@@ -110,9 +109,9 @@ public:
       bool RenderOverlay(wxDC &dc, PlugIn_ViewPort *vp);
       bool RenderGLOverlay(wxGLContext *pcontext, PlugIn_ViewPort *vp);
 
-      void SetDefaults(void);
+      void SetDefaults();
 
-      int GetToolbarToolCount(void);
+      int GetToolbarToolCount();
 
       void SetCursorLatLon(double lat, double lon);
 
@@ -132,9 +131,11 @@ public:
 
 private:
       void OnCursorLatLonTimer( wxTimerEvent & );
+      void RequestOcpnDrawSetting();
+      void NewWR();
 
-      bool LoadConfig(void);
-      bool SaveConfig(void);
+      bool LoadConfig();
+      bool SaveConfig();
 
       bool	       b_in_boundary_reply;
 
@@ -147,6 +148,8 @@ private:
       int              m_display_width, m_display_height;
       int              m_leftclick_tool_id;
       int              m_position_menu_id;
+      int              m_waypoint_menu_id;
+      int              m_route_menu_id;
 
       wxTimer m_tCursorLatLon;
 };
